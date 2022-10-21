@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useReducer } from 'react';
 import { ContactForm } from 'components/ContactForm';
 import { Filter } from 'components/Filter';
 import { ContactList } from 'components/ContactList';
@@ -8,7 +8,21 @@ import { initailContacts } from 'utils/initialContacts';
 
 const STORAGE_KEY = 'contacts';
 
+// function setReducer(state, action) {
+//   switch (action.type) {
+//     case 'filter':
+//       return { ...state, filter: state.filter + action.payload };
+//     default:
+//       throw new Error(`Unsupported action action type ${action.type}`);
+//   }
+// }
+
 export function ContactHub() {
+  const initialValue = {
+    contacts: [],
+    filter: '',
+  };
+  //   const [state, dispatch] = useReducer(setReducer, initialValue);
   const [contacts, setContacts] = useLocalStorage(STORAGE_KEY, initailContacts);
   const [filter, setFilter] = useState('');
 
@@ -17,6 +31,10 @@ export function ContactHub() {
   function onFilterChange({ filter }) {
     !filter ? setFilter('') : setFilter(filter);
   }
+
+  //   function onFilterChange({ value }) {
+  //     dispatch({ type: 'filter', payload: value });
+  //   }
 
   function formSubmitHandler({ name, number }) {
     const checkName = contacts.some(item =>
