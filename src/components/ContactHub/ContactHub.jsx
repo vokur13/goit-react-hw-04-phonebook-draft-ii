@@ -26,8 +26,6 @@ export function ContactHub() {
   const [contacts, setContacts] = useLocalStorage(STORAGE_KEY, initailContacts);
   const [filter, setFilter] = useState('');
 
-  useEffect(() => {}, []);
-
   function onFilterChange({ filter }) {
     !filter ? setFilter('') : setFilter(filter);
   }
