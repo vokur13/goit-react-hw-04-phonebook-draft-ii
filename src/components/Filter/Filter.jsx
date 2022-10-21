@@ -1,11 +1,25 @@
-import React from 'react';
 import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { nanoid } from 'nanoid';
 import { Box } from '../Box';
 import { Label, Input } from './Filter.styled';
 
-export const Filter = ({ value, onChange }) => {
+export const Filter = ({ onChange }) => {
   const filterID = nanoid();
+  const [filter, setFilter] = useState('');
+
+  const { register, watch } = useForm();
+
+  onChange(filter);
+
+  useEffect(() => {
+    const subscription = watch(value => {
+      setFilter(value);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   return (
     <Box
@@ -18,12 +32,11 @@ export const Filter = ({ value, onChange }) => {
       boxShadow="basic"
     >
       <Label htmlFor={filterID}>Find contacts by name</Label>
-      <Input id={filterID} type="text" value={value} onChange={onChange} />
+      <Input id={filterID} type="text" {...register('filter')} />
     </Box>
   );
 };
 
 Filter.propTypes = {
-  value: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
 };
