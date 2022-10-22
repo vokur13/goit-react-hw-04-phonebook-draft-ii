@@ -15,6 +15,9 @@ export const Filter = ({ onChange }) => {
 
   useEffect(() => {
     const subscription = watch(value => {
+      if (!value) {
+        return;
+      }
       setFilter(value);
     });
 

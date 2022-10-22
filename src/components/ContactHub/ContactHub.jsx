@@ -21,7 +21,11 @@ function setReducer(state, action) {
         contacts: state.contacts.filter(item => item.id !== action.payload),
       };
     case 'onFilterChange':
-      return { ...state, filter: action.payload };
+      console.log('onFilterChange', action.payload);
+      return {
+        ...state,
+        filter: action.payload,
+      };
     //   !filter ? setFilter('') : setFilter(filter);
     default:
       throw new Error(`Unsupported action action type ${action.type}`);
@@ -44,6 +48,9 @@ export function ContactHub() {
   //   const [filter, setFilter] = useState('');
 
   function onFilterChange({ filter }) {
+    if (!filter) {
+      return;
+    }
     //     !filter ? setFilter('') : setFilter(filter);
     dispatch({ type: 'onFilterChange', payload: filter });
   }
