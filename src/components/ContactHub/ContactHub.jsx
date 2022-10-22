@@ -8,26 +8,44 @@ import { initailContacts } from 'utils/initialContacts';
 
 const STORAGE_KEY = 'contacts';
 
-// function setReducer(state, action) {
-//   switch (action.type) {
-//     case 'filter':
-//       return { ...state, filter: state.filter + action.payload };
-//     default:
-//       throw new Error(`Unsupported action action type ${action.type}`);
-//   }
-// }
+function setReducer(state, action) {
+  switch (action.type) {
+    case 'formSubmitHandler':
+      return {
+        ...state,
+        contacts: [action.payload, ...state.contacts],
+      };
+    case 'deleteItem':
+      return {
+        ...state,
+        contacts: state.contacts.filter(item => item.id !== action.payload),
+      };
+    case 'onFilterChange':
+      return { ...state, filter: action.payload };
+    //   !filter ? setFilter('') : setFilter(filter);
+    default:
+      throw new Error(`Unsupported action action type ${action.type}`);
+  }
+}
 
 export function ContactHub() {
-  const initialValue = {
+  //   const initialValue = {
+  //     contacts: useLocalStorage(STORAGE_KEY, initailContacts),
+  //     filter: '',
+  //   };
+
+  const [state, dispatch] = useReducer(setReducer, {
+    //     contacts: useLocalStorage(STORAGE_KEY, initailContacts),
     contacts: [],
     filter: '',
-  };
-  //   const [state, dispatch] = useReducer(setReducer, initialValue);
-  const [contacts, setContacts] = useLocalStorage(STORAGE_KEY, initailContacts);
-  const [filter, setFilter] = useState('');
+  });
+
+  //     const [contacts, setContacts] = useLocalStorage(STORAGE_KEY, initailContacts);
+  //   const [filter, setFilter] = useState('');
 
   function onFilterChange({ filter }) {
-    !filter ? setFilter('') : setFilter(filter);
+    //     !filter ? setFilter('') : setFilter(filter);
+    dispatch({ type: 'onFilterChange', payload: filter });
   }
 
   //   function onFilterChange({ value }) {
@@ -35,22 +53,25 @@ export function ContactHub() {
   //   }
 
   function formSubmitHandler({ name, number }) {
-    const checkName = contacts.some(item =>
+    const checkName = state.contacts.some(item =>
       item.name.toLowerCase().trim().includes(name.toLowerCase().trim())
     );
     checkName
       ? alert(`${name} is already in contacts`)
-      : setContacts([{ id: nanoid(), name, number }, ...contacts]);
+      : dispatch({
+          type: 'formSubmitHandler',
+          payload: { id: nanoid(), name, number },
+        });
   }
 
   const filteredContacts = useMemo(() => {
-    return contacts.filter(item =>
-      item.name.toLowerCase().trim().includes(filter.toLowerCase().trim())
+    return state.contacts.filter(item =>
+      item.name.toLowerCase().trim().includes(state.filter.toLowerCase().trim())
     );
-  }, [contacts, filter]);
+  }, [state.filter, state.contacts]);
 
   function deleteItem(itemID) {
-    setContacts(contacts.filter(item => item.id !== itemID));
+    dispatch({ type: 'deleteItem', payload: itemID });
   }
 
   return (
