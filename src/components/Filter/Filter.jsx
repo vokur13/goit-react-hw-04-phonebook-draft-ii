@@ -14,11 +14,9 @@ export const Filter = ({ onChange }) => {
   onChange(filter);
 
   useEffect(() => {
-    const subscription = watch(value => {
-      if (!value) {
-        return;
-      }
-      setFilter(value);
+    const subscription = watch(({ filter }) => {
+      console.log(filter);
+      setFilter(filter);
     });
 
     return () => subscription.unsubscribe();

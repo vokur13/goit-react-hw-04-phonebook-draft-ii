@@ -1,9 +1,10 @@
-import { useState, useMemo, useEffect, useReducer } from 'react';
+import { useState, useMemo, useEffect, useReducer, useRef } from 'react';
 import { ContactForm } from 'components/ContactForm';
 import { Filter } from 'components/Filter';
 import { ContactList } from 'components/ContactList';
 import { nanoid } from 'nanoid';
-import { useLocalStorage } from 'hooks/useLocalStorage';
+import { save, load } from '../../utils/storage';
+// import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { initailContacts } from 'utils/initialContacts';
 
 const STORAGE_KEY = 'contacts';
@@ -20,44 +21,32 @@ function setReducer(state, action) {
         ...state,
         contacts: state.contacts.filter(item => item.id !== action.payload),
       };
-    case 'onFilterChange':
-      console.log('onFilterChange', action.payload);
-      return {
-        ...state,
-        filter: action.payload,
-      };
-    //   !filter ? setFilter('') : setFilter(filter);
     default:
       throw new Error(`Unsupported action action type ${action.type}`);
   }
 }
 
+function init(initialState) {
+  return {
+    ...initialState,
+    contacts: [...initialState.contacts, ...initailContacts],
+  };
+}
+
 export function ContactHub() {
-  //   const initialValue = {
-  //     contacts: useLocalStorage(STORAGE_KEY, initailContacts),
-  //     filter: '',
-  //   };
-
-  const [state, dispatch] = useReducer(setReducer, {
+  const isFirstRender = useRef(true);
+  const initialState = {
     //     contacts: useLocalStorage(STORAGE_KEY, initailContacts),
-    contacts: [],
+    contacts: load(STORAGE_KEY) ? load(STORAGE_KEY) : [],
     filter: '',
-  });
+  };
 
-  //     const [contacts, setContacts] = useLocalStorage(STORAGE_KEY, initailContacts);
-  //   const [filter, setFilter] = useState('');
+  const [state, dispatch] = useReducer(setReducer, initialState, init);
+  const [filter, setFilter] = useState('');
 
-  function onFilterChange({ filter }) {
-    if (!filter) {
-      return;
-    }
-    //     !filter ? setFilter('') : setFilter(filter);
-    dispatch({ type: 'onFilterChange', payload: filter });
+  function onFilterChange(value) {
+    !value ? setFilter('') : setFilter(value);
   }
-
-  //   function onFilterChange({ value }) {
-  //     dispatch({ type: 'filter', payload: value });
-  //   }
 
   function formSubmitHandler({ name, number }) {
     const checkName = state.contacts.some(item =>
@@ -71,11 +60,19 @@ export function ContactHub() {
         });
   }
 
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    //     save(STORAGE_KEY, state.contacts);
+  }, [state.contacts]);
+
   const filteredContacts = useMemo(() => {
     return state.contacts.filter(item =>
-      item.name.toLowerCase().trim().includes(state.filter.toLowerCase().trim())
+      item.name.toLowerCase().trim().includes(filter.toLowerCase().trim())
     );
-  }, [state.filter, state.contacts]);
+  }, [filter, state.contacts]);
 
   function deleteItem(itemID) {
     dispatch({ type: 'deleteItem', payload: itemID });
